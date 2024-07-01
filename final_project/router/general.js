@@ -1,9 +1,11 @@
 const express = require('express');
 let books = require("./booksdb.js");
-let isValid = require("./auth_users.js").isValid;
+const jwt = require('jsonwebtoken');
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require('axios');
 
+const BASE_URL = "https://tominasfatj-5000.theianext-0-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/";
 
 public_users.post("/register", (req,res) => {
   //Write your code here
@@ -37,53 +39,66 @@ const doesExist = (username) => {
     }
 }
 
-// Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  //Write your code here
-  res.send(JSON.stringify(books, null, 2));
-});
 
-// Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
-  //Write your code here
-  let bookISBN = req.params.isbn
-  res.send(books.filter(bookISBN))
- });
+// Route to fetch all books
+
+
+public_users.get('/',function (req, res) {
+
+    const get_books = new Promise((resolve, reject) => {
+        resolve(res.send(JSON.stringify({books}, null, 4)));
+      });
+
+      get_books.then(() => console.log("Promise for Task 10 resolved"));
+
+  });
+
   
+  // Get book details based on ISBN
+public_users.get('/isbn/:isbn',function (req, res) {
+//Write your code here
+    let bookISBN = req.params.isbn
+    const get_books = new Promise((resolve, reject) => {
+        resolve(res.send(books[bookISBN]))
+    })});
+
+
+
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
-  const author = req.params.author.toLowerCase();
-  const matchingBooks = [];
-
-  for (const key in books) {
+const author = req.params.author.toLowerCase();
+const matchingBooks = [];
+const get_books = new Promise((resolve, reject) => {
+for (const key in books) {
     if (books[key].author.toLowerCase() === author) {
-      matchingBooks.push(books[key]);
+    matchingBooks.push(books[key]);
     }
-  }
+}
+})
 
-  if (matchingBooks.length > 0) {
+if (matchingBooks.length > 0) {
     res.send(JSON.stringify(matchingBooks, null, 2));
-  } else {
+} else {
     res.status(404).json({ message: "No books found for the given author" });
-  }
+}
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
-  const title = req.params.title.toLowerCase();
-  const matchingBooks = [];
-
-  for (const key in books) {
+const title = req.params.title.toLowerCase();
+const matchingBooks = [];
+const get_books = new Promise((resolve, reject) => {
+for (const key in books) {
     if (books[key].title.toLowerCase() === title) {
-      matchingBooks.push(books[key]);
+    matchingBooks.push(books[key]);
     }
-  }
+}})
 
-  if (matchingBooks.length > 0) {
+if (matchingBooks.length > 0) {
     res.send(JSON.stringify(matchingBooks, null, 2));
-  } else {
+} else {
     res.status(404).json({ message: "No books found with the given title" });
-  }
+}
 });
 
 //  Get book review
@@ -97,5 +112,8 @@ public_users.get('/review/:isbn', function (req, res) {
     res.status(404).json({ message: "No book found with the given ISBN" });
   }
 });
+
+
+
 
 module.exports.general = public_users;
